@@ -34,12 +34,12 @@ steps:
   - checkout: Registration
   - checkout: ExcelDnaDoc
   - task: PowerShell@2
-  inputs:
-    targetType: 'inline'
-    workingFolder: ExcelDna\MasterBuild
-    script: |
-      $Env:PACKAGE_VERSION = "$(cat ..\version.txt)+$($Env:Build_BuildId%65536)"
-      .\MasterBuild.cmd
+    inputs:
+      targetType: 'inline'
+      workingFolder: ExcelDna\MasterBuild
+      script: |
+        $Env:PACKAGE_VERSION = "$(cat ..\version.txt)+$($Env:Build_BuildId%65536)"
+        .\MasterBuild.cmd
   - task: DotNetCoreCLI@2
     inputs:
       command: push
