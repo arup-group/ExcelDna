@@ -39,7 +39,7 @@ steps:
       workingFolder: ExcelDna\MasterBuild
       script: |
         $Env:PACKAGE_VERSION = "$(cat .\ExcelDna\version.txt)+$($Env:Build_BuildId%65536)"
-        .\MasterBuild.cmd
+        .\ExcelDna\MasterBuild\MasterBuild.cmd
   - task: DotNetCoreCLI@2
     inputs:
       command: push
