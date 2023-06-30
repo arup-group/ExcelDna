@@ -12,10 +12,6 @@ variables:
 
 resources:
   repositories:
-  - repository: ExcelDna
-    endpoint: arup-group
-    type: github
-    name: arup-group/ExcelDna
   - repository: IntelliSense
     endpoint: arup-group
     type: github
