@@ -2,6 +2,13 @@
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
+trigger: none
+
+pool:
+  vmImage: windows-latest
+
+variables:
+- group: excel-dna
 
 resources:
   repositories:
@@ -12,31 +19,32 @@ resources:
   - repository: IntelliSense
     endpoint: arup-group
     type: github
-    name: Excel-DNA/IntelliSense    
+    name: Excel-DNA/IntelliSense
+    ref: e7871efe9bfbc2aaefc68bbd88ddb66d81c0fb9a    
   - repository: Registration
     endpoint: arup-group
     type: github
-    name: Excel-DNA/Registration   
+    name: Excel-DNA/Registration
+    ref: 8b9dcd0656d788f22d2be7e846de13476b482c50   
   - repository: ExcelDnaDoc
     endpoint: arup-group
     type: github
-    name: Excel-DNA/ExcelDnaDoc    
+    name: Excel-DNA/ExcelDnaDoc
+    ref: d76f144af1ef4fa32341263cf26308d3d3886324    
 
-trigger:
-- master
-
-pool:
-  vmImage: windows-latest
-
-jobs:
-- job: buildExecutables
-  steps:
+steps:
   - checkout: self
   - checkout: ExcelDna
   - checkout: IntelliSense
   - checkout: Registration
   - checkout: ExcelDnaDoc   
-  - task: PowerShell@1
+  - task: BatchScript@1
     inputs:
-      scriptType: inlineScript
-      scriptName: "echo hello"
+      filename: ExcelDna\MasterBuild\MasterBuild.cmd
+      workingFolder: ExcelDna\MasterBuild
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: push
+      packagesToPush: '$(Build.SourcesDirectory)/ExcelDna/Package/nupkg/*.nupkg'
+      nuGetFeedType: internal
+      publishVstsFeed: 'a704a910-c375-48a7-9ea9-dd5b985bdf8c'
