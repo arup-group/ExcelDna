@@ -34,7 +34,6 @@ resources:
 
 steps:
   - checkout: self
-  - checkout: ExcelDna
   - checkout: IntelliSense
   - checkout: Registration
   - checkout: ExcelDnaDoc   
