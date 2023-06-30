@@ -38,7 +38,7 @@ steps:
       targetType: 'inline'
       workingFolder: ExcelDna\MasterBuild
       script: |
-        $Env:PACKAGE_VERSION = "$(cat .\ExcelDna\version.txt)+$($Env:Build_BuildId%65536)"
+        $Env:PACKAGE_VERSION = "$(cat .\ExcelDna\version.txt).$($Env:Build_BuildId%65536)"
         .\ExcelDna\MasterBuild\MasterBuild.cmd
   - task: DotNetCoreCLI@2
     inputs:
