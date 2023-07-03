@@ -40,9 +40,11 @@ steps:
       script: |
         $Env:PACKAGE_VERSION = "$(cat .\ExcelDna\version.txt).$($Env:Build_BuildId%65536)"
         .\ExcelDna\MasterBuild\MasterBuild.cmd
-  - task: DotNetCoreCLI@2
+  - task: NuGetAuthenticate@1
+  - task: NuGetCommand@2
+    displayName: 'NuGet push'
     inputs:
       command: push
       packagesToPush: '$(Build.SourcesDirectory)/ExcelDna/Package/nupkg/*.nupkg'
-      nuGetFeedType: internal
       publishVstsFeed: 'a704a910-c375-48a7-9ea9-dd5b985bdf8c'
+      allowPackageConflicts: true

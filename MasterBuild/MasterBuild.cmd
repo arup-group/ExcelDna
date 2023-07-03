@@ -1,7 +1,7 @@
 setlocal
 
-set PackageVersion=%PACKAGE_VERSION%
-set PackageReferenceVersion=%PACKAGE_VERSION%
+set PackageVersion=1.7.0-ac2
+set PackageReferenceVersion=1.7.0-ac2
 set DllVersion=1.7.0.3
 
 set MSBuildPath="%MSBUILD_PATH%"
