@@ -33,5 +33,5 @@ NOTE: Before building making sure that:
 4. Sometimes having alternative nuget package sources can mess up the build script, turning them off (in Visual Studio Nuget Package Manager) seems to solve this issue
 5. Make sure you are cd'd into the `MasterBuild` folder before running the script (if running from powershell/command line)
 
-The CI/CD pipeline takes care of all the above details and makes the packages available on the ArupcomputeDevops nuget feed. See:
-    https://dev.azure.com/arupcomputedevops/ArupCompute/_build?definitionId=35
+The [CI/CD pipeline](https://dev.azure.com/arupcomputedevops/ArupCompute/_build?definitionId=35) takes care of all the above details and makes the packages available on the ArupcomputeDevops nuget feed. The feed is only updated for packages with new version numbers.
+    
