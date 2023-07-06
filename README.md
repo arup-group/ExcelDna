@@ -27,7 +27,11 @@ To build see [here](https://excel-dna.net/docs/guides-advanced/building-excedna-
 
 NOTE: Before building making sure that:
 1. You have installed the C++ modules on Visual Studio
-2. You change the first line in the instructions, `set MSBuildPath="C:\Program Files\Microsoft Visual Studio\2022\Community\Msbuild\Current\Bin\amd64\MSBuild.exe"` to `set MSBuildPath="C:\Program Files\Microsoft Visual Studio\2022\Professional\Msbuild\Current\Bin\amd64\MSBuild.exe"` if using Visual Studio Professional
+2. You have set environment variable MSBUILD_PATH to the location of MSBuild.exe. Do that instead of setting the path directly in MasterBuild.cmd as per the original build instructions. If using Visual Studio Professional the command is:  
+`set MSBUILD_PATH="C:\Program Files\Microsoft Visual Studio\2022\Professional\Msbuild\Current\Bin\amd64\MSBuild.exe"`
 3. You have pulled down the non-Arup-Group versions of IntelliSense, Registration, and ExcelDnaDoc. There are not separate Arup-Group versions, but they are required to use this version locally
 4. Sometimes having alternative nuget package sources can mess up the build script, turning them off (in Visual Studio Nuget Package Manager) seems to solve this issue
 5. Make sure you are cd'd into the `MasterBuild` folder before running the script (if running from powershell/command line)
+
+The [CI/CD pipeline](https://dev.azure.com/arupcomputedevops/ArupCompute/_build?definitionId=35) takes care of all the above details and makes the packages available on the ArupcomputeDevops nuget feed. The feed is only updated for packages with new version numbers.
+    
