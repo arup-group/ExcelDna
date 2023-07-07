@@ -42,6 +42,6 @@ steps:
     displayName: 'NuGet push'
     inputs:
       command: push
-      packagesToPush: '$(Build.SourcesDirectory)/ExcelDna/Package/nupkg/*.nupkg'
+      packagesToPush: '$(Build.SourcesDirectory)/**/*.nupkg'
       publishVstsFeed: 'a704a910-c375-48a7-9ea9-dd5b985bdf8c'
       allowPackageConflicts: true
