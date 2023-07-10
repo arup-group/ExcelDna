@@ -43,5 +43,5 @@ steps:
     inputs:
       command: push
       packagesToPush: '$(Build.SourcesDirectory)/**/*.nupkg'
-      publishVstsFeed: ArupCompute/arupcomputedevops_test
+      publishVstsFeed: ArupCompute/arupcomputedevops
       allowPackageConflicts: true
