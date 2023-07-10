@@ -7,7 +7,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using ExcelDna.AddIn.Tasks.Logging;
 using ExcelDna.AddIn.Tasks.Utils;
-using ExcelDna.PackedResources.Logging;
 
 namespace ExcelDna.AddIn.Tasks
 {
@@ -213,13 +212,7 @@ namespace ExcelDna.AddIn.Tasks
         /// <summary>
         /// The name suffix for 64-bit .dna files
         /// </summary>
-        public string FileSuffix64Bit
-        {
-            get { return BuildTaskCommon.IsNone(_FileSuffix64Bit) ? null : _FileSuffix64Bit; }
-            set { _FileSuffix64Bit = value; }
-        }
-
-        private string _FileSuffix64Bit;
+        public string FileSuffix64Bit { get; set; }
 
         /// <summary>
         /// Enable/disable to have an .xll file with no packed assemblies

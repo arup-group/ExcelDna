@@ -73,8 +73,6 @@ namespace ExcelDna.Loader
         static bool _initialized = false;
         static bool _opened = false;
 
-        static List<GCHandle> fnHandles = new List<GCHandle>();
-
         #region Initialization
 
         public static bool Initialize(IntPtr xlAddInExportInfoAddress, IntPtr hModuleXll, string pathXll,
@@ -104,55 +102,55 @@ namespace ExcelDna.Loader
             }
 
             fn_short_void fnXlAutoOpen = (fn_short_void)XlAutoOpen;
-            fnHandles.Add(GCHandle.Alloc(fnXlAutoOpen));
+            GCHandle.Alloc(fnXlAutoOpen);
             pXlAddInExportInfo->pXlAutoOpen = Marshal.GetFunctionPointerForDelegate(fnXlAutoOpen);
 
             fn_short_void fnXlAutoClose = (fn_short_void)XlAutoClose;
-            fnHandles.Add(GCHandle.Alloc(fnXlAutoClose));
+            GCHandle.Alloc(fnXlAutoClose);
             pXlAddInExportInfo->pXlAutoClose = Marshal.GetFunctionPointerForDelegate(fnXlAutoClose);
 
             fn_short_void fnXlAutoRemove = (fn_short_void)XlAutoRemove;
-            fnHandles.Add(GCHandle.Alloc(fnXlAutoRemove));
+            GCHandle.Alloc(fnXlAutoRemove);
             pXlAddInExportInfo->pXlAutoRemove = Marshal.GetFunctionPointerForDelegate(fnXlAutoRemove);
 
             fn_void_intptr fnXlAutoFree12 = (fn_void_intptr)XlAutoFree12;
-            fnHandles.Add(GCHandle.Alloc(fnXlAutoFree12));
+            GCHandle.Alloc(fnXlAutoFree12);
             pXlAddInExportInfo->pXlAutoFree12 = Marshal.GetFunctionPointerForDelegate(fnXlAutoFree12);
 
             fn_void_intptr fnSetExcel12EntryPt = (fn_void_intptr)XlCallImpl.SetExcel12EntryPt;
-            fnHandles.Add(GCHandle.Alloc(fnSetExcel12EntryPt));
+            GCHandle.Alloc(fnSetExcel12EntryPt);
             pXlAddInExportInfo->pSetExcel12EntryPt = Marshal.GetFunctionPointerForDelegate(fnSetExcel12EntryPt);
 
             fn_hresult_void fnDllRegisterServer = (fn_hresult_void)DllRegisterServer;
-            fnHandles.Add(GCHandle.Alloc(fnDllRegisterServer));
+            GCHandle.Alloc(fnDllRegisterServer);
             pXlAddInExportInfo->pDllRegisterServer = Marshal.GetFunctionPointerForDelegate(fnDllRegisterServer);
 
             fn_hresult_void fnDllUnregisterServer = (fn_hresult_void)DllUnregisterServer;
-            fnHandles.Add(GCHandle.Alloc(fnDllUnregisterServer));
+            GCHandle.Alloc(fnDllUnregisterServer);
             pXlAddInExportInfo->pDllUnregisterServer = Marshal.GetFunctionPointerForDelegate(fnDllUnregisterServer);
 
             fn_get_class_object fnDllGetClassObject = (fn_get_class_object)DllGetClassObject;
-            fnHandles.Add(GCHandle.Alloc(fnDllGetClassObject));
+            GCHandle.Alloc(fnDllGetClassObject);
             pXlAddInExportInfo->pDllGetClassObject = Marshal.GetFunctionPointerForDelegate(fnDllGetClassObject);
 
             fn_hresult_void fnDllCanUnloadNow = (fn_hresult_void)DllCanUnloadNow;
-            fnHandles.Add(GCHandle.Alloc(fnDllCanUnloadNow));
+            GCHandle.Alloc(fnDllCanUnloadNow);
             pXlAddInExportInfo->pDllCanUnloadNow = Marshal.GetFunctionPointerForDelegate(fnDllCanUnloadNow);
 
             fn_void_double fnSyncMacro = (fn_void_double)SyncMacro;
-            fnHandles.Add(GCHandle.Alloc(fnSyncMacro));
+            GCHandle.Alloc(fnSyncMacro);
             pXlAddInExportInfo->pSyncMacro = Marshal.GetFunctionPointerForDelegate(fnSyncMacro);
 
             fn_intptr_intptr fnRegistrationInfo = (fn_intptr_intptr)RegistrationInfo;
-            fnHandles.Add(GCHandle.Alloc(fnRegistrationInfo));
+            GCHandle.Alloc(fnRegistrationInfo);
             pXlAddInExportInfo->pRegistrationInfo = Marshal.GetFunctionPointerForDelegate(fnRegistrationInfo);
 
             fn_void_void fnCalculationCanceled = (fn_void_void)CalculationCanceled;
-            fnHandles.Add(GCHandle.Alloc(fnCalculationCanceled));
+            GCHandle.Alloc(fnCalculationCanceled);
             pXlAddInExportInfo->pCalculationCanceled = Marshal.GetFunctionPointerForDelegate(fnCalculationCanceled);
 
             fn_void_void fnCalculationEnded = (fn_void_void)CalculationEnded;
-            fnHandles.Add(GCHandle.Alloc(fnCalculationEnded));
+            GCHandle.Alloc(fnCalculationEnded);
             pXlAddInExportInfo->pCalculationEnded = Marshal.GetFunctionPointerForDelegate(fnCalculationEnded);
 
             LPenHelper = (LPenHelperDelegate)Marshal.GetDelegateForFunctionPointer(pXlAddInExportInfo->pLPenHelper, typeof(LPenHelperDelegate));
@@ -244,9 +242,6 @@ namespace ExcelDna.Loader
                 _initialized = false;
                 _opened = false;
             }
-
-            fnHandles.ForEach(i => i.Free());
-            fnHandles.Clear();
         }
         #endregion
 

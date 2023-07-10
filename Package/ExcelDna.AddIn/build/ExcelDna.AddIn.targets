@@ -218,9 +218,7 @@
       PackedFileSuffix="$(ExcelDnaPackXllSuffix)"
       Packed32BitXllName="$(ExcelDnaPack32BitXllName)"
       Packed64BitXllName="$(ExcelDnaPack64BitXllName)"
-      PackManagedOnWindows="$(ExcelDnaPackManagedResourcePackingOnWindows)"
       PublishPath="$(ExcelDnaPublishPath)"
-      CompressResources="$(ExcelDnaPackCompressResources)"
  	  AddInName="$(ExcelAddInName)"
  	  AddInFileName="$(ExcelAddInFileName)"
  	  AddInInclude="$(ExcelAddInInclude)"
@@ -232,8 +230,6 @@
 	  TlbExp="$(ExcelAddInTlbExp)"
 	  TlbCreate="$(ExcelAddInTlbCreate)"
 	  UseVersionAsOutputVersion="$(ExcelAddInUseVersionAsOutputVersion)"
-	  ExplicitExports="$(ExcelAddInExplicitExports)"
-	  ExplicitRegistration="$(ExcelAddInExplicitRegistration)"
 	  IntegrationDllPath="$(ExcelDnaRuntimeToolsPath)ExcelDna.Integration.dll"
 	  TemplateDnaPath="$(MSBuildThisFileDirectory)..\content\ExcelDna-Template.dna">
       <Output TaskParameter="DnaFilesToPack" ItemName="ExcelDnaFilesToPack" />
@@ -251,13 +247,8 @@
 	<PackExcelAddIn
 		OutputDnaFileName="%(ExcelDnaFilesToPack.OutputDnaFileName)"
 		OutputPackedXllFileName="%(ExcelDnaFilesToPack.OutputPackedXllFileName)"
-		OutputBitness="%(ExcelDnaFilesToPack.OutputBitness)"
 		CompressResources="$(ExcelDnaPackCompressResources)"
 		RunMultithreaded="$(ExcelDnaPackRunMultithreaded)"
-		PackNativeLibraryDependencies="$(ExcelDnaPackNativeLibraryDependencies)"
-		PackManagedDependencies="$(ExcelDnaPackManagedDependencies)"
-		ExcludeDependencies="$(ExcelDnaPackExcludeDependencies)"
-		PackManagedOnWindows="$(ExcelDnaPackManagedResourcePackingOnWindows)"
 		SignTool="$(ExcelAddInSignTool)"
 		SignOptions="$(ExcelAddInSignOptions)">
 	</PackExcelAddIn>
@@ -274,7 +265,7 @@
           SkipUnchangedFiles="true" />
   </Target>
 
-  <Target Name="HideExcelDnaInteropEmbeddableAssemblies" AfterTargets="ResolveReferences" BeforeTargets="FindReferenceAssembliesForReferences" Condition="$(MSBuildProjectExtension)!='.fsproj'">
+  <Target Name="HideExcelDnaInteropEmbeddableAssemblies" AfterTargets="ResolveReferences" BeforeTargets="FindReferenceAssembliesForReferences">
 		<ItemGroup>
 			<ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' == 'ExcelDna.Interop'" />
 			<ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' == 'ExcelDna.Interop.Dao'" />

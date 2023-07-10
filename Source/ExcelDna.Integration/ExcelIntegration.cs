@@ -206,7 +206,6 @@ namespace ExcelDna.Integration
         internal static void DeInitialize()
         {
             DnaLibrary.DeInitialize();
-            Logging.TraceLogger.DeInitialize();
         }
 
         internal static void DnaLibraryAutoOpen()

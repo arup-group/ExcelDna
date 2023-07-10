@@ -8,8 +8,6 @@ using System.Reflection;
 
 using System.IO;
 using ExcelDna.Integration;
-using ExcelDna.AddIn.Tasks.Logging;
-using ExcelDna.PackedResources.Logging;
 
 namespace ExcelDnaPack
 {
@@ -62,7 +60,6 @@ Other assemblies are packed if marked with Pack=""true"" in the .dna file.
 
         private static int Pack(string[] args)
         {
-            var buildLogger = new ConsoleLogger(nameof(PackProgram));
 
             //			string testLib = @"C:\Work\ExcelDna\Version\ExcelDna-0.23\Source\ExcelDnaPack\bin\Debug\exceldna.xll";
             //			ResourceHelper.ResourceLister rl = new ResourceHelper.ResourceLister(testLib);
@@ -85,7 +82,7 @@ Other assemblies are packed if marked with Pack=""true"" in the .dna file.
             {
                 string xllFullPath = args[1];
                 bool includePdb = (args[2] == "Debug");
-                PackXllBuild(xllFullPath, includePdb, buildLogger);
+                PackXllBuild(xllFullPath, includePdb);
                 return 0;
             }
 
@@ -94,7 +91,6 @@ Other assemblies are packed if marked with Pack=""true"" in the .dna file.
             bool overwrite = false;
             bool compress = true;
             bool multithreading = true;
-            string outputBitness = "32";
 
             // TODO: Replace with an args-parsing routine.
             if (args.Length > 1)
@@ -125,15 +121,10 @@ Other assemblies are packed if marked with Pack=""true"" in the .dna file.
                     {
                         multithreading = false;
                     }
-                    else
-                    if (args[i].Equals("/x64", StringComparison.CurrentCultureIgnoreCase))
-                    {
-                        outputBitness = "64";
-                    }
                 }
             }
 
-            int result = ExcelDna.PackedResources.ExcelDnaPack.Pack(dnaPath, xllOutputPath, compress, multithreading, overwrite, usageInfo, null, false, false, null, false, outputBitness, buildLogger);
+            int result = ExcelDna.PackedResources.ExcelDnaPack.Pack(dnaPath, xllOutputPath, compress, multithreading, overwrite, usageInfo, null);
 
 #if DEBUG
             if (result == 0)
@@ -152,15 +143,16 @@ Other assemblies are packed if marked with Pack=""true"" in the .dna file.
             return result;
         }
 
-        private static void PackXllBuild(string xllFullPath, bool includePdb, IBuildLogger buildLogger)
+        static void PackXllBuild(string xllFullPath, bool includePdb)
         {
-            ResourceHelper.ResourceUpdater ru = new ResourceHelper.ResourceUpdater(xllFullPath, false, buildLogger);
+            ResourceHelper.ResourceUpdater ru = new ResourceHelper.ResourceUpdater(xllFullPath);
 
             var xllDir = Path.GetDirectoryName(xllFullPath);
-            ru.AddAssembly(Path.Combine(xllDir, "ExcelDna.ManagedHost.dll"), null, compress: false, multithreading: false, includePdb);
-            ru.AddAssembly(Path.Combine(xllDir, "ExcelDna.Loader.dll"), null, compress: true, multithreading: false, includePdb);
-            ru.AddAssembly(Path.Combine(xllDir, "ExcelDna.Integration.dll"), null, compress: true, multithreading: false, includePdb);
+            ru.AddAssembly(Path.Combine(xllDir, "ExcelDna.ManagedHost.dll"), compress: false, multithreading: false, includePdb);
+            ru.AddAssembly(Path.Combine(xllDir, "ExcelDna.Loader.dll"), compress: true, multithreading: false, includePdb);
+            ru.AddAssembly(Path.Combine(xllDir, "ExcelDna.Integration.dll"), compress: true, multithreading: false, includePdb);
             ru.EndUpdate();
         }
     }
+
 }

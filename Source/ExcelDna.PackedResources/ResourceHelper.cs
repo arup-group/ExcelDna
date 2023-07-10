@@ -11,8 +11,6 @@ using System.Collections.Generic;
 using SevenZip.Compression.LZMA;
 using System.Threading;
 using System.Globalization;
-using ExcelDna.PackedResources;
-using ExcelDna.PackedResources.Logging;
 
 internal static class ResourceHelper
 {
@@ -24,13 +22,51 @@ internal static class ResourceHelper
         IMAGE = 2,
         SOURCE = 3,
         PDB = 4,
-        NATIVE_LIBRARY = 5,
     }
 
     // TODO: Learn about locales
     private const ushort localeNeutral = 0;
     private const ushort localeEnglishUS = 1033;
     private const ushort localeEnglishSA = 7177;
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern IntPtr BeginUpdateResource(
+        string pFileName,
+        bool bDeleteExistingResources);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool EndUpdateResource(
+        IntPtr hUpdate,
+        bool fDiscard);
+
+    //, EntryPoint="UpdateResourceA", CharSet=CharSet.Ansi,
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool UpdateResource(
+        IntPtr hUpdate,
+        string lpType,
+        string lpName,
+        ushort wLanguage,
+        IntPtr lpData,
+        uint cbData);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool UpdateResource(
+        IntPtr hUpdate,
+        string lpType,
+        IntPtr intResource,
+        ushort wLanguage,
+        IntPtr lpData,
+        uint cbData);
+
+    // This overload provides the resource type and name conversions that would be done by MAKEINTRESOURCE
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool UpdateResource(
+        IntPtr hUpdate,
+        uint lpType,
+        uint lpName,
+        ushort wLanguage,
+        IntPtr lpData,
+        uint cbData);
 
     [DllImport("version.dll", SetLastError = true)]
     private static extern uint GetFileVersionInfoSize(
@@ -103,43 +139,34 @@ internal static class ResourceHelper
 
     internal class ResourceUpdater
     {
-        private readonly IBuildLogger buildLogger;
-        private readonly IResourceResolver resourceResolver;
-        private readonly object lockResource = new object();
+        int typelibIndex = 0;
+        IntPtr _hUpdate;
+        List<object> updateData = new List<object>();
 
-        private int typelibIndex = 0;
-        private List<object> updateData = new List<object>();
-        private Queue<ManualResetEvent> finishedTask = new Queue<ManualResetEvent>();
+        object lockResource = new object();
 
-        public ResourceUpdater(string fileName, bool useManagedResourceResolver, IBuildLogger buildLogger)
+        Queue<ManualResetEvent> finishedTask = new Queue<ManualResetEvent>();
+
+        public ResourceUpdater(string fileName)
         {
-            this.buildLogger = buildLogger;
-            if (useManagedResourceResolver)
+            _hUpdate = BeginUpdateResource(fileName, false);
+            if (_hUpdate == IntPtr.Zero)
             {
-#if ASMRESOLVER
-                resourceResolver = new ResourceResolverManaged();
-#endif
+                throw new Win32Exception();
             }
-            else
-            {
-                resourceResolver = new ResourceResolverWin();
-            }
-
-            resourceResolver.Begin(fileName);
         }
 
-        private void CompressDoUpdateHelper(byte[] content, string name, TypeName typeName, string source, bool compress)
+        private void CompressDoUpdateHelper(byte[] content, string name, TypeName typeName, bool compress)
         {
             if (compress)
-            {
                 content = SevenZipHelper.Compress(content);
-            }
-
-            DoUpdateResource(typeName.ToString() + (compress ? "_LZMA" : ""), name, source, content);
+            DoUpdateResource(typeName.ToString() + (compress ? "_LZMA" : ""), name, content);
         }
 
-        public string AddFile(byte[] content, string name, TypeName typeName, string source, bool compress, bool multithreading)
+        public string AddFile(byte[] content, string name, TypeName typeName, bool compress, bool multithreading)
         {
+            XorRecode(content);
+
             Debug.Assert(name == name.ToUpperInvariant());
 
             if (multithreading)
@@ -147,21 +174,21 @@ internal static class ResourceHelper
                 var mre = new ManualResetEvent(false);
                 finishedTask.Enqueue(mre);
                 ThreadPool.QueueUserWorkItem(delegate
-                {
-                    CompressDoUpdateHelper(content, name, typeName, source, compress);
-                    mre.Set();
-                }
+                    {
+                        CompressDoUpdateHelper(content, name, typeName, compress);
+                        mre.Set();
+                    }
                 );
             }
             else
             {
-                CompressDoUpdateHelper(content, name, typeName, source, compress);
+                CompressDoUpdateHelper(content, name, typeName, compress);
             }
 
             return name;
         }
 
-        public string AddAssembly(string path, string source, bool compress, bool multithreading, bool includePdb)
+        public string AddAssembly(string path, bool compress, bool multithreading, bool includePdb)
         {
             try
             {
@@ -179,20 +206,19 @@ internal static class ResourceHelper
                     name += "." + cultureInfo.Name.ToUpperInvariant();
                 }
 
-                AddFile(assemblyBytes, name, TypeName.ASSEMBLY, source, compress, multithreading);
+                AddFile(assemblyBytes, name, TypeName.ASSEMBLY, compress, multithreading);
 
                 string pdbFile = Path.ChangeExtension(path, "pdb");
                 if (includePdb && File.Exists(pdbFile))
                 {
                     byte[] pdbBytes = File.ReadAllBytes(pdbFile);
-                    AddFile(pdbBytes, name, TypeName.PDB, source, compress, multithreading);
+                    AddFile(pdbBytes, name, TypeName.PDB, compress, multithreading);
                 }
-
                 return name;
             }
             catch (Exception e)
             {
-                buildLogger.Error(e, "Assembly at {0} could not be packed. Possibly a mixed assembly? (These are not supported yet.)\r\nException: {1}", path, e);
+                Console.WriteLine("Assembly at " + path + " could not be packed. Possibly a mixed assembly? (These are not supported yet.)\r\nException: " + e);
                 return null;
             }
         }
@@ -204,28 +230,29 @@ internal static class ResourceHelper
                 string typeName = "TYPELIB";
                 typelibIndex++;
 
-                buildLogger.Information("  ->  Updating typelib: Type: {0}, Index: {1}, Length: {2}", typeName, typelibIndex, data.Length);
+                Console.WriteLine(string.Format("  ->  Updating typelib: Type: {0}, Index: {1}, Length: {2}", typeName, typelibIndex, data.Length));
                 GCHandle pinHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
                 updateData.Add(pinHandle);
 
-                bool result = resourceResolver.Update(typeName, (IntPtr)typelibIndex, localeNeutral, pinHandle.AddrOfPinnedObject(), (uint)data.Length);
+                bool result = ResourceHelper.UpdateResource(_hUpdate, typeName, (IntPtr)typelibIndex, localeNeutral, pinHandle.AddrOfPinnedObject(), (uint)data.Length);
                 if (!result)
                 {
                     throw new Win32Exception();
                 }
-            }
 
+            }
             return typelibIndex;
         }
 
-        public void DoUpdateResource(string typeName, string name, string source, byte[] data)
+        public void DoUpdateResource(string typeName, string name, byte[] data)
         {
             lock (lockResource)
             {
-                string sourceInfo = (source != null) ? $" Source: {source}," : null;
-                buildLogger.Information($"  ->  Updating resource: Type: {typeName}, Name: {name},{sourceInfo} Length: {data.Length}");
+                Console.WriteLine(string.Format("  ->  Updating resource: Type: {0}, Name: {1}, Length: {2}", typeName, name, data.Length));
+                GCHandle pinHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
+                updateData.Add(pinHandle);
 
-                bool result = resourceResolver.Update(typeName, name, localeNeutral, data);
+                bool result = ResourceHelper.UpdateResource(_hUpdate, typeName, name, localeNeutral, pinHandle.AddrOfPinnedObject(), (uint)data.Length);
                 if (!result)
                 {
                     throw new Win32Exception();
@@ -237,7 +264,7 @@ internal static class ResourceHelper
         {
             lock (lockResource)
             {
-                bool result = resourceResolver.Update(typeName, name, localeNeutral, null);
+                bool result = UpdateResource(_hUpdate, typeName, name, localeNeutral, IntPtr.Zero, 0);
                 if (!result)
                 {
                     throw new Win32Exception();
@@ -268,7 +295,8 @@ internal static class ResourceHelper
                 {
                     uint versionResourceType = 16;
                     uint versionResourceId = 1;
-                    result = resourceResolver.Update(
+                    result = ResourceHelper.UpdateResource(
+                        _hUpdate,
                         versionResourceType,
                         versionResourceId,
                         localeNeutral,
@@ -310,7 +338,11 @@ internal static class ResourceHelper
                 }
             }
 
-            resourceResolver.End(discard);
+            bool result = EndUpdateResource(_hUpdate, discard);
+            if (!result)
+            {
+                throw new Win32Exception();
+            }
         }
 
         // Load the resource, trying also as compressed if no uncompressed version is found.
@@ -358,6 +390,8 @@ internal static class ResourceHelper
                 resultBytes = Decompress(resourceBytes);
             else
                 resultBytes = resourceBytes;
+
+            XorRecode(resultBytes);
             return resultBytes;
         }
 
@@ -383,6 +417,16 @@ internal static class ResourceHelper
             decoder.Code(newInStream, newOutStream, compressedSize, outSize, null);
             byte[] b = newOutStream.ToArray();
             return b;
+        }
+
+        static readonly byte[] _xorKeys = System.Text.Encoding.ASCII.GetBytes("ExcelDna");
+        static void XorRecode(byte[] data)
+        {
+            var keys = _xorKeys;
+            for (int i = 0; i < data.Length; i++)
+            {
+                data[i] = (byte)(keys[i % keys.Length] ^ data[i]);
+            }
         }
     }
 }

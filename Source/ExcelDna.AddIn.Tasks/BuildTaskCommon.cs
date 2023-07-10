@@ -60,11 +60,6 @@ namespace ExcelDna.AddIn.Tasks
             return buildItemsForDnaFiles;
         }
 
-        internal static bool IsNone(string s)
-        {
-            return string.Equals(s, "%none%", StringComparison.OrdinalIgnoreCase);
-        }
-
         private string GetDnaFileNameAs32Bit(string fileName)
         {
             return GetFileNameWithBitnessSuffix(fileName, _fileSuffix32Bit);
