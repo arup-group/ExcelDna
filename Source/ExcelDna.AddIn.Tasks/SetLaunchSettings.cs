@@ -32,7 +32,7 @@ namespace ExcelDna.AddIn.Tasks
                 {
                     commandName = "Executable",
                     executablePath = excelExePath,
-                    commandLineArgs = "/x " + '"' + Path.GetFileName(addInForDebugging) + '"'
+                    commandLineArgs = Path.GetFileName(addInForDebugging)
                 };
 
                 if (File.Exists(settingsPath))

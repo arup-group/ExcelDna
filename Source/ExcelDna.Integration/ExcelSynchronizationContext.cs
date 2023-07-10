@@ -507,7 +507,7 @@ namespace ExcelDna.Integration
             return ExcelIntegration.LPenHelper(XlCall.xlGetFmlaInfo, ref fmlaInfo);
         }
 
-        public static bool IsInFormulaEditMode()
+        static bool IsInFormulaEditMode()
         {
             // check edit state directly
             var fmlaInfo = new XlCall.FmlaInfo();

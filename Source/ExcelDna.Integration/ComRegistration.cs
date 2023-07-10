@@ -2,6 +2,7 @@
 //  Excel-DNA is licensed under the zlib license. See LICENSE.txt for details.
 
 using System;
+using System.Configuration;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -214,7 +215,7 @@ namespace ExcelDna.ComInterop.ComRegistration
 
         static bool CanWriteMachineHive()
         {
-            return false;
+			return false;
             // This is not an easy question to answer, due to Registry Virtualization: http://msdn.microsoft.com/en-us/library/aa965884(v=vs.85).aspx
             // So if registry virtualization is active, the machine writes will redirect to a special user key.
             // I don't know how to detect that case, so we'll just write to the virtualized location.
@@ -377,6 +378,21 @@ namespace ExcelDna.ComInterop.ComRegistration
             Logger.ComAddIn.Verbose("RegistrationUtil.SetValue({0}, {1}, {2}, {3})", keyName, valueName, value.ToString(), valueKind.ToString());
             Registry.SetValue(keyName, valueName, value, valueKind);
         }
+
+        // Helper for AppSettings (can move somewhere later)
+        static bool AppSettingsFlag(string key)
+        {
+            var value = ConfigurationManager.AppSettings[key];
+            if (value == null)
+                return false;
+            
+            bool flag;
+            if (bool.TryParse(value, out flag))
+                return flag;
+
+            return false;
+        }
+
     }
 
     // Disposable base class

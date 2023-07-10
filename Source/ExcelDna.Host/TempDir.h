@@ -14,7 +14,7 @@ public:
 
 private:
 	void DeletePendingDirs();
-	void DeleteDir(const std::wstring& dirPath, bool createPendingDeleteFile);
+	void DeleteDir(const std::wstring& dirPath);
 
 	std::wstring path, topDirPath;
 };

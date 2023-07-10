@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using ExcelDna.PackedResources.Logging;
+using ExcelDna.AddIn.Tasks.Logging;
 using Microsoft.Build.Framework;
 using ExcelDna.AddIn.Tasks.Utils;
 
@@ -137,13 +137,7 @@ namespace ExcelDna.AddIn.Tasks
         /// <summary>
         /// The name suffix for 64-bit .dna files
         /// </summary>
-        public string FileSuffix64Bit
-        {
-            get { return BuildTaskCommon.IsNone(_FileSuffix64Bit) ? null : _FileSuffix64Bit; }
-            set { _FileSuffix64Bit = value; }
-        }
-
-        private string _FileSuffix64Bit;
+        public string FileSuffix64Bit { get; set; }
 
         /// <summary>
         /// Custom add-in file name

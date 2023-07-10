@@ -16,17 +16,17 @@ resources:
     endpoint: arup-group
     type: github
     name: Excel-DNA/IntelliSense
-    ref: e7871efe9bfbc2aaefc68bbd88ddb66d81c0fb9a    
+    ref: c730c636feb63768c612b8a50988cb004eca8909
   - repository: Registration
     endpoint: arup-group
     type: github
     name: Excel-DNA/Registration
-    ref: 8b9dcd0656d788f22d2be7e846de13476b482c50   
+    ref: 79e6c3863f4e52e87fc71224081441160df1b7ba   
   - repository: ExcelDnaDoc
     endpoint: arup-group
     type: github
     name: Excel-DNA/ExcelDnaDoc
-    ref: d76f144af1ef4fa32341263cf26308d3d3886324    
+    ref: 4b0bf7057a0d0ab1f0128d708f1c8390db693dd5    
 
 steps:
   - checkout: self
@@ -42,6 +42,6 @@ steps:
     displayName: 'NuGet push'
     inputs:
       command: push
-      packagesToPush: '$(Build.SourcesDirectory)/ExcelDna/Package/nupkg/*.nupkg'
-      publishVstsFeed: 'a704a910-c375-48a7-9ea9-dd5b985bdf8c'
+      packagesToPush: '$(Build.SourcesDirectory)/**/*.nupkg'
+      publishVstsFeed: ArupCompute/arupcomputedevops_test
       allowPackageConflicts: true

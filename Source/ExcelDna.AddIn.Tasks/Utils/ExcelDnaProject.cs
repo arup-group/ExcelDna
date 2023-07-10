@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using ExcelDna.PackedResources.Logging;
+using ExcelDna.AddIn.Tasks.Logging;
 
 namespace ExcelDna.AddIn.Tasks.Utils
 {
